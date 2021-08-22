@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Session.Logic;
 using Session.Model;
 
 namespace Session.Controllers
@@ -59,16 +60,15 @@ namespace Session.Controllers
 
         public bool AuthenticateUser(User user)
         {
-            var listOfUsers = _context.Users.Where(
-                                      q => q.Username == user.Username &&
-                                      q.Password == user.Password);
+            var userList = _context.Users.Where(q => q.Username == user.Username);
+            if (userList.Count() != 1)
+                return false;
 
-            if (listOfUsers.Count() == 1)
-            {
-                return true;
-            }
+            var userInDB = userList.FirstOrDefault();
 
-            return false;
+            string hashed = PasswordHashing.hashPassword(user.Password,userInDB.salt);
+
+            return (hashed == userInDB.Password);
         }
     }
 }

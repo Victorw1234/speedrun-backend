@@ -34,6 +34,58 @@ namespace Session.Model
                     Password="apa123"
                 }
                 
+
+            );
+            modelBuilder.Entity<Game>().HasData(
+                new Game
+                {
+                    Id = 1,
+                    Title = "Halo 3"
+                },
+                new Game
+                {
+                    Id=2,
+                    Title="Super Mario 64"
+                }
+                );
+
+            
+
+            modelBuilder.Entity<CategoryExtension>().HasData(
+                new CategoryExtension
+                {
+                    Id=1,
+                    GameId = 1,
+                    Title="Easy"
+                },
+                new CategoryExtension
+                {
+                    Id=2,
+                    GameId=1,
+                    Title="Legendary",
+                    
+                }
+                );
+
+            modelBuilder.Entity<Time>().HasData(
+                new Time
+                {
+                    Id=1,
+                    UserId=2,
+                    Link= "https://www.youtube.com/watch?v=uhpuu6B3L8E",
+                    RunTime = new DateTime(1,1,1,1,1,57),
+                    CategoryExtensionId=1
+
+                }
+
+                );
+            modelBuilder.Entity<GameAdmin>().HasData(
+                new GameAdmin
+                {
+                    Id = 1,
+                    GameId = 1,
+                    UserId = 2
+                }
                 );
         }
     }

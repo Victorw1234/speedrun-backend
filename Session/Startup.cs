@@ -37,7 +37,9 @@ namespace Session
                 options.IdleTimeout = TimeSpan.FromMinutes(120);
                 options.Cookie.IsEssential = true;
             });
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            ); 
             services.AddDbContext<ApplicationDbContext>(
         options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
         }

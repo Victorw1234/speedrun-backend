@@ -9,6 +9,11 @@ namespace Session.Model
     {
         public int Id { get; set; }
         public string Title { get; set; }
+        public string UrlTitle { get
+            {
+                return Title.ToLower().Trim().Replace(" ","_");
+            }
+                                    }
         public IEnumerable<CategoryExtension> CategoryExtensions { get; set; }
         public IEnumerable<GameAdmin> Admins { get; set; }
 
