@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Session.Logic;
 using Session.Model;
+using Session.Model.ViewModels;
 
 namespace Session.Controllers
 {
@@ -20,21 +22,72 @@ namespace Session.Controllers
             _context = context;
         }
         [Route("{urlGame}/{urlCategoryExtension}")]
-        public IActionResult GameCategoryExtension(string urlGame,string urlCategoryExtension)
+        public IActionResult GameCategoryExtension(string urlGame, string urlCategoryExtension)
         {
-            Game game = _context.Games.ToList<Game>()
-                                      .Where(q => q.UrlTitle == urlGame)
-                                      .FirstOrDefault();
-            CategoryExtension categoryExtension = _context.CategoryExtensions.ToList<CategoryExtension>()
-                                                                             .Where(q => q.UrlTitle == urlCategoryExtension && 
-                                                                                         q.GameId == game.Id)
-                                                                             .FirstOrDefault();
+            Game game = GetGame(urlGame);
+            CategoryExtension categoryExtension = GetCategoryExtension(game.Id, urlCategoryExtension);
 
             IEnumerable<Time> times = _context.Times.Include("User")
                                                     .Where(q => q.CategoryExtensionId == categoryExtension.Id);
 
 
-            return Ok(times.Select(x => new { x.Id, x.Link, x.RunTime, x.User.Username }));
+            return Ok(times.Select(x => new { x.Id, x.Link,x.DateSet, x.RunTime, x.User.Username }));
         }
+        [HttpPost]
+        [Route("{urlGame}/{urlCategoryExtension}")]
+        public IActionResult AddTime(AddTimeViewModel time, string urlGame, string urlCategoryExtension)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            var username = HttpContext.Session.GetString("username");
+            if (username == null)
+                return StatusCode(401);
+
+            Game game = GetGame(urlGame);
+            CategoryExtension ce = GetCategoryExtension(game.Id, urlCategoryExtension);
+
+            // remove their earlier time, if they had any.
+            // you could change this in the future if you want
+            // to maintain a history of their PBs
+
+            Time t = _context.Times.Where(q => q.CategoryExtensionId == ce.Id && // their old time
+                                 q.User.Username == username)
+                                    .FirstOrDefault();
+            if (t != null)
+            {
+                _context.Times.Remove(t);
+            }
+
+            // new time
+
+            Time newTime = new Time();
+            newTime.CategoryExtensionId = ce.Id;
+            newTime.Link = time.Link;
+            newTime.RunTime = new DateTime(1,1,1,time.RunTime.Hour, time.RunTime.Minute, time.RunTime.Second, time.RunTime.Millisecond);
+            newTime.DateSet = DateTime.Now;
+            newTime.UserId = UserLogic.GetUser(_context,username).Id;
+
+            _context.Times.Add(newTime);
+            _context.SaveChanges();
+
+            return Ok();
+
+        }
+
+        public Game GetGame(string urlGame)
+        {
+            return _context.Games.ToList<Game>()
+                                    .Where(q => q.UrlTitle == urlGame)
+                                    .FirstOrDefault();
+        }
+
+        public CategoryExtension GetCategoryExtension(int gameId, string urlCategoryExtension)
+        {
+            return _context.CategoryExtensions.ToList<CategoryExtension>()
+                                        .Where(q => q.UrlTitle == urlCategoryExtension &&
+                                                    q.GameId == gameId)
+                                        .FirstOrDefault();
+        }
+
     }
 }

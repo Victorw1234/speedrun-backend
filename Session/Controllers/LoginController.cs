@@ -38,6 +38,7 @@ namespace Session.Controllers
             if (AuthenticateUser(user))
             {
                 HttpContext.Session.SetString("username", user.Username);
+                HttpContext.Session.SetInt32("id", user.Id);
                 return Ok( new { user.Username });
             }
             return BadRequest();

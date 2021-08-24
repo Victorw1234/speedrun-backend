@@ -10,6 +10,7 @@ namespace Session.Model
         public int Id { get; set; }
         public DateTime RunTime { get; set; }
         public string Link { get; set; }
+        public DateTime DateSet { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
         public int CategoryExtensionId { get; set; }
