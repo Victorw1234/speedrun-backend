@@ -70,7 +70,7 @@ namespace Session.Controllers
             _context.Times.Add(newTime);
             _context.SaveChanges();
 
-            return Ok();
+            return Ok(new { msg = "added time successfully"});
 
         }
 
