@@ -39,9 +39,9 @@ namespace Session.Controllers
             {
                 HttpContext.Session.SetString("username", user.Username);
                 HttpContext.Session.SetInt32("id", user.Id);
-                return Ok( new { user.Username });
+                return Ok( new { success = true,username = user.Username });
             }
-            return BadRequest();
+            return BadRequest(new { success = false});
         }
 
         [HttpGet]

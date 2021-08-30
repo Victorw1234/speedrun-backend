@@ -27,7 +27,8 @@ namespace Session.Controllers
             Game game = GetGame(urlGame);
             CategoryExtension categoryExtension = GetCategoryExtension(game.Id, urlCategoryExtension);
 
-            IEnumerable<Time> times = _context.Times.Include("User")
+            IEnumerable<Time> times = _context.Times.OrderBy(q => q.RunTime)
+                                                    .Include("User")
                                                     .Where(q => q.CategoryExtensionId == categoryExtension.Id);
 
 
@@ -38,10 +39,10 @@ namespace Session.Controllers
         public IActionResult AddTime(AddTimeViewModel time, string urlGame, string urlCategoryExtension)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
+                return BadRequest(new { timeAdded = false });
             var username = HttpContext.Session.GetString("username");
             if (username == null)
-                return StatusCode(401);
+                return StatusCode(401,new { timeAdded = false });
 
             Game game = GetGame(urlGame);
             CategoryExtension ce = GetCategoryExtension(game.Id, urlCategoryExtension);
@@ -70,7 +71,7 @@ namespace Session.Controllers
             _context.Times.Add(newTime);
             _context.SaveChanges();
 
-            return Ok(new { msg = "added time successfully"});
+            return Ok(new { timeAdded = true,msg = "added time successfully"});
 
         }
 
