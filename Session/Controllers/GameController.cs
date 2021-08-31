@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Session.Model;
+using Session.Model.ViewModels;
 
 namespace Session.Controllers
 {
@@ -56,6 +57,14 @@ namespace Session.Controllers
                 return BadRequest(e);
             }
             return RedirectToAction("GameById", new { id = gameId });
+        }
+        [Route("/AddGame")]
+        [HttpPost]
+        public IActionResult AddGame(AddGameViewModel game)
+        {
+
+
+            return Ok();
         }
 
     }
