@@ -40,12 +40,14 @@ namespace Session.Model
                 new Game
                 {
                     Id = 1,
-                    Title = "Halo 3"
+                    Title = "Halo 3",
+                    ImageName = "halo3.jpg"
                 },
                 new Game
                 {
                     Id=2,
-                    Title="Super Mario 64"
+                    Title="Super Mario 64",
+                    ImageName = "sm64.png"
                 }
                 );
 

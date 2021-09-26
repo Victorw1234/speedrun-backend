@@ -22,12 +22,15 @@ namespace Session.Controllers
             
         }
         [Route("")]
+        /*Returns full list of games*/
         public IActionResult Game()
         {
             List<Game> games = _context.Games.ToList<Game>();
             return Ok(games);
         }
         [Route("{id}")]
+        /*Returns 1 game by Id
+         Example: localhost/api/Game/1*/
         public IActionResult GameById(int id)
         {
             Game game = _context.Games
@@ -41,6 +44,9 @@ namespace Session.Controllers
             return Ok(game);
         }
         [Route("[action]/{urlTitle}")]
+        /*Returns 1 game by url-string
+          Example: localhost/api/Game/ByString/halo_3 (this is pretty ugly)
+          returns halo 3*/
         public IActionResult ByString(string urlTitle)
         {
             int gameId;

@@ -14,7 +14,7 @@ namespace Session.Model
                 return Title.ToLower().Trim().Replace(" ","_");
             }
                                     }
-        public byte[] Image { get; set; }
+        public string ImageName { get; set; }
 
         public IEnumerable<CategoryExtension> CategoryExtensions { get; set; }
         public IEnumerable<GameAdmin> Admins { get; set; }

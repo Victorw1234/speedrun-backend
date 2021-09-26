@@ -12,7 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Session.Model;
-
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 namespace Session
 {
     public class Startup
@@ -53,6 +54,13 @@ namespace Session
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+            Path.Combine(env.ContentRootPath, "Resources")),
+                RequestPath = "/Resources"
+            });
+
             app.UseCors(b => b.AllowAnyHeader()
                               .AllowAnyMethod()
                               .WithOrigins("http://localhost:52107", "http://localhost:3000")
