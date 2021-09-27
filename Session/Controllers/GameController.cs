@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Session.Model;
 using Session.Model.ViewModels;
+using Session.Logic;
 
 namespace Session.Controllers
 {
@@ -64,11 +65,40 @@ namespace Session.Controllers
             }
             return RedirectToAction("GameById", new { id = gameId });
         }
-        [Route("/AddGame")]
+        /*
+         Only a moderator for the entire site
+         can add a game.
+         */
+        [Route("AddGame")]
         [HttpPost]
         public IActionResult AddGame(AddGameViewModel game)
         {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            var user = UserLogic.GetUser(_context, HttpContext.Session.GetString("username"));
+            if (user is null)
+                return StatusCode(401,new {error="Not logged in"});
+            
+            bool isMod = UserLogic.isSiteModerator(_context, user.Id);
 
+            if (!isMod)
+                return StatusCode(401, new { error = "Not a site moderator" });
+
+            /*Verification done*/
+
+            /* Now add game to database.*/
+            Game g = new Game();
+            g.Title = game.Title;
+            g.ImageName = "qmark.png";
+            _context.Games.Add(g);
+            _context.SaveChanges();
+
+            GameAdmin gameAdmin = new GameAdmin();
+            gameAdmin.GameId = g.Id;
+            gameAdmin.UserId = user.Id;
+            _context.GameAdmins.Add(gameAdmin);
+
+            _context.SaveChanges();
 
             return Ok();
         }

@@ -12,7 +12,6 @@ namespace Session.Model.ViewModels
         [MinLength(2)]
         [MaxLength(50)]
         public string Title { get; set; }
-        [Required]
-        public byte[] Image { get; set; }
+
     }
 }

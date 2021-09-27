@@ -17,6 +17,7 @@ namespace Session.Model
         public string Username { get; set; }
         [Required]
         public string Password { get; set; }
+        public bool SiteModerator { get; set; }
         public byte[] salt { get; set; }
         public IEnumerable<Time> Times { get; set; }
         public IEnumerable<GameAdmin> Admin { get; set; }

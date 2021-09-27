@@ -13,5 +13,15 @@ namespace Session.Logic
         {
             return ctx.Users.Where(q => q.Username == username).FirstOrDefault();
         }
+
+        public static bool isSiteModerator(ApplicationDbContext ctx,int userId)
+        {
+            var user = ctx.Users.Where(user => user.Id == userId).FirstOrDefault();
+            if (user is null)
+                return false;
+
+            return user.SiteModerator;
+
+        }
     }
 }
