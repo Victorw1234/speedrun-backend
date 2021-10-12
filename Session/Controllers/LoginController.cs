@@ -27,9 +27,10 @@ namespace Session.Controllers
             if (HttpContext.Session.GetString("username") != null)
             {
                 msg = HttpContext.Session.GetString("username");
-                return Ok( new {isLoggedIn = true,username = msg});
+                bool siteMod = _context.Users.Where(user => user.Username == msg).FirstOrDefault().SiteModerator; // lookup if sitemod
+                return Ok( new {isLoggedIn = true,username = msg,siteModerator = siteMod});
             }
-            return BadRequest( new {isLoggedIn = false, msg } );
+            return BadRequest( new {isLoggedIn = false, msg,siteModerator = false } );
         }
 
         [HttpPost]
@@ -38,7 +39,7 @@ namespace Session.Controllers
             if (AuthenticateUser(user))
             {
                 HttpContext.Session.SetString("username", user.Username);
-                HttpContext.Session.SetInt32("id", user.Id);
+                HttpContext.Session.SetInt32("id", user.Id); // detta är broken
                 return Ok( new { success = true,username = user.Username });
             }
             return BadRequest(new { success = false});
