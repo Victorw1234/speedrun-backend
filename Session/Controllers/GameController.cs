@@ -77,16 +77,18 @@ namespace Session.Controllers
                 return BadRequest();
             var user = UserLogic.GetUser(_context, HttpContext.Session.GetString("username"));
             if (user is null)
-                return StatusCode(401,new {error="Not logged in"});
+                return StatusCode(401,new {status="Not logged in"});
             
             bool isMod = UserLogic.isSiteModerator(_context, user.Id);
 
             if (!isMod)
-                return StatusCode(401, new { error = "Not a site moderator" });
+                return StatusCode(401, new { status = "Not a site moderator" });
 
             /*Verification done*/
 
             /* Now add game to database.*/
+            if (GameLogic.DuplicateGame(game.Title,_context) == false)
+                return StatusCode(401, new { status = "That game exist in the db already" });
             Game g = new Game();
             g.Title = game.Title;
             g.ImageName = "qmark.png";
@@ -100,7 +102,7 @@ namespace Session.Controllers
 
             _context.SaveChanges();
 
-            return Ok();
+            return Ok(new { status="Successfully added game to database"});
         }
 
     }

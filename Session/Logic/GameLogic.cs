@@ -8,6 +8,9 @@ namespace Session.Logic
 {
     public static class GameLogic
     {
-        
+        public static bool DuplicateGame(string Title,ApplicationDbContext ctx) 
+        {
+            return ctx.Games.Where(q => q.Title == Title).Count() != 0;
+        }
     }
 }
