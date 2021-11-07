@@ -45,7 +45,7 @@ namespace Session.Controllers
             return Ok(game);
         }
         [Route("[action]/{urlTitle}")]
-        /*Returns 1 game by url-string
+        /*Returns one game by url-string
           Example: localhost/api/Game/ByString/halo_3 (this is pretty ugly)
           returns halo 3*/
         public IActionResult ByString(string urlTitle)
@@ -87,20 +87,12 @@ namespace Session.Controllers
             /*Verification done*/
 
             /* Now add game to database.*/
-            if (GameLogic.DuplicateGame(game.Title,_context) == false)
-                return StatusCode(401, new { status = "That game exist in the db already" });
             Game g = new Game();
             g.Title = game.Title;
-            g.ImageName = "qmark.png";
-            _context.Games.Add(g);
-            _context.SaveChanges();
-
-            GameAdmin gameAdmin = new GameAdmin();
-            gameAdmin.GameId = g.Id;
-            gameAdmin.UserId = user.Id;
-            _context.GameAdmins.Add(gameAdmin);
-
-            _context.SaveChanges();
+            if (!GameLogic.AddGame(_context,g,user))
+            {
+                return StatusCode(401, new { status = "That game exist in the db already" });
+            }
 
             return Ok(new { status="Successfully added game to database"});
         }
