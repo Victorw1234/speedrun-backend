@@ -34,15 +34,31 @@ namespace Session.Controllers
          Example: localhost/api/Game/1*/
         public IActionResult GameById(int id)
         {
+            List<GameAdmin> u = _context.Games.Include("Admins").Include("Admins.User").Where(q => q.Id == id).FirstOrDefault().Admins.ToList<GameAdmin>();
+            List<string> gameAdminUsernames = new List<string>();
+            for (int i  = 0; i < u.Count(); i++)
+            {
+                gameAdminUsernames.Add(u.ElementAt(i).User.Username);
+            }
             Game game = _context.Games
                                 .Include("CategoryExtensions")
+                                .Include("Admins").Include("Admins.User")
                                 .Where(q => q.Id == id)
                                 .FirstOrDefault();
             if (game == null)
             {
                 return BadRequest(new {Error = "No game with that Id exist" });
             }
-            return Ok(game);
+            return Ok(
+                new
+                {
+                    categoryExtensions = game.CategoryExtensions,
+                    imageName = game.ImageName,
+                    title = game.Title,
+                    urlTitle = game.UrlTitle,
+                    admins = gameAdminUsernames
+                }
+                );
         }
         [Route("[action]/{urlTitle}")]
         /*Returns one game by url-string
