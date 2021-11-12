@@ -23,5 +23,10 @@ namespace Session.Logic
             return user.SiteModerator;
 
         }
+
+        public static bool isGameAdmin(ApplicationDbContext ctx, int userId,int gameId)
+        {
+            return (ctx.GameAdmins.Where(ga => ga.UserId == userId && ga.GameId == gameId).Count() != 0);
+        }
     }
 }

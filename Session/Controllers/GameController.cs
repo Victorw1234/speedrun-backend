@@ -9,6 +9,7 @@ using Session.Model;
 using Session.Model.ViewModels;
 using Session.Logic;
 
+
 namespace Session.Controllers
 {
     [Route("api/[controller]")]
@@ -112,6 +113,57 @@ namespace Session.Controllers
 
             return Ok(new { status="Successfully added game to database"});
         }
+
+        [Route("[action]")]
+        [HttpPost]
+        public IActionResult AddGameImage(AddGameImageViewModel vm)
+        {
+            var user = UserLogic.GetUser(_context, HttpContext.Session.GetString("username"));
+            Game game = _context.Games.Where(g => g.Title == vm.GameTitle).FirstOrDefault();
+            if (user is null)
+                return StatusCode(401, new { status = "Not logged in" });
+
+            bool isGameAdmin = UserLogic.isGameAdmin(_context,user.Id,game.Id);
+            if (!isGameAdmin)
+                return StatusCode(401, new { status = "Not a game admin for this game" });
+
+
+            string fileType;
+            try
+            {
+                fileType = vm.Img.Split(";")[0].Split(":")[1];
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e);
+            }
+
+            if (fileType == "image/jpeg" || fileType == "image/jpg")
+            {
+                fileType = "jpg";
+            }
+            else if (fileType == "image/png")
+            {
+                fileType = "png";   
+            }
+            else
+            {
+                return BadRequest(new { msg = "Invalid data format" });
+            }
+
+            
+            string filePath = $"C:\\Users\\victo\\source\\repos\\Session\\Session\\Resources\\Images\\{game.UrlTitle}.{fileType}";
+            string base64withoutHeader = vm.Img.Split(",")[1];
+            System.IO.File.Delete(filePath);
+            System.IO.File.WriteAllBytes(filePath, Convert.FromBase64String(base64withoutHeader));
+            game.ImageName = game.UrlTitle + "." + fileType;
+           
+            _context.SaveChanges();
+
+            return Ok(new { msg = "Successfully updated image" });
+        }
+
+
 
     }
 }
