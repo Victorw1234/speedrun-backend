@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Session.Model
 {
@@ -11,7 +12,7 @@ namespace Session.Model
         public string Title { get; set; }
         public string UrlTitle { get
             {
-                return Title.ToLower().Trim().Replace(" ", "_");
+                return Title.ToLower().Trim().Replace(" ", "_").Replace("%","");
             }
         }
         public int GameId { get; set; }

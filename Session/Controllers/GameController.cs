@@ -27,6 +27,7 @@ namespace Session.Controllers
         /*Returns full list of games*/
         public IActionResult Game()
         {
+            
             List<Game> games = _context.Games.ToList<Game>();
             return Ok(games);
         }
@@ -76,7 +77,7 @@ namespace Session.Controllers
                                        .Id;
 
             }
-            catch (System.NullReferenceException e)
+            catch (Exception e)
             {
                 return BadRequest(e);
             }

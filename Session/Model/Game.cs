@@ -11,7 +11,7 @@ namespace Session.Model
         public string Title { get; set; }
         public string UrlTitle { get
             {
-                return Title.ToLower().Trim().Replace(" ","_").Replace(":","");
+                return Title.ToLower().Trim().Replace(" ","_").Replace(":","").Replace("%", "");
             }
                                     }
         public string ImageName { get; set; }
