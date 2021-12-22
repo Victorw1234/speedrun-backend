@@ -54,6 +54,7 @@ namespace Session.Controllers
             return Ok(
                 new
                 {
+                    success = true,
                     categoryExtensions = game.CategoryExtensions,
                     imageName = game.ImageName,
                     title = game.Title,
@@ -77,9 +78,9 @@ namespace Session.Controllers
                                        .Id;
 
             }
-            catch (Exception e)
+            catch (NullReferenceException e)
             {
-                return BadRequest(e);
+                return BadRequest(new { success = false });
             }
             return RedirectToAction("GameById", new { id = gameId });
         }
