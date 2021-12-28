@@ -20,6 +20,11 @@ namespace Session.Controllers
             _context = context;
         }
 
+        /*
+         Returns to client if they are logged in.
+         Also returns whether or not the client is a site mod.
+         {isLoggedIn,username,siteModerator}
+         */
         [HttpGet]
         public IActionResult Login()
         {
@@ -33,6 +38,10 @@ namespace Session.Controllers
             return BadRequest( new {isLoggedIn = false, msg,siteModerator = false } );
         }
 
+        /*
+         Logs user in.
+         Assuming successful login, return {success, username}
+         */
         [HttpPost]
         public IActionResult Login(User user)
         {
@@ -59,11 +68,13 @@ namespace Session.Controllers
             msg = "Not logged in";
             return BadRequest(new { msg });
         }
-
+        /*
+        looks up if username exists. Then checks if password is correct by hashing and comparing. 
+        */
         public bool AuthenticateUser(User user)
         {
-            var userList = _context.Users.Where(q => q.Username == user.Username);
-            if (userList.Count() != 1)
+            var userList = _context.Users.Where(q => q.Username == user.Username); 
+            if (userList.Count() != 1) 
                 return false;
 
             var userInDB = userList.FirstOrDefault();
