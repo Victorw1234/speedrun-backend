@@ -30,7 +30,7 @@ namespace Session.Controllers
             }
             Game game = _context.Games.Where(g => g.Title == vm.gameTitle).FirstOrDefault();
 
-            bool isGameMod = UserLogic.isGameAdmin(_context, user.Id, game.Id);
+            bool isGameMod = user.isGameAdmin(_context,game.Id);
             if (!isGameMod)
             {
                 return StatusCode(401, new { message = "Unauthorized, not game admin" });

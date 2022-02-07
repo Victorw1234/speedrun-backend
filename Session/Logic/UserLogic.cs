@@ -14,7 +14,7 @@ namespace Session.Logic
             return ctx.Users.Where(q => q.Username == username).FirstOrDefault();
         }
 
-        public static bool isSiteModerator(ApplicationDbContext ctx,int userId)
+        /*public static bool isSiteModerator(ApplicationDbContext ctx,int userId)
         {
             var user = ctx.Users.Where(user => user.Id == userId).FirstOrDefault();
             if (user is null)
@@ -27,6 +27,6 @@ namespace Session.Logic
         public static bool isGameAdmin(ApplicationDbContext ctx, int userId,int gameId)
         {
             return (ctx.GameAdmins.Where(ga => ga.UserId == userId && ga.GameId == gameId).Count() != 0);
-        }
+        }*/
     }
 }

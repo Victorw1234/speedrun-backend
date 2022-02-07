@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Session.Model;
 using Session.Model.ViewModels;
 using Session.Logic;
-
+using Microsoft.Extensions.Configuration;
 
 namespace Session.Controllers
 {
@@ -16,12 +16,13 @@ namespace Session.Controllers
     [ApiController]
     public class GameController : ControllerBase
     {
-
+        IConfiguration configuration;
         private readonly ApplicationDbContext _context;
-        public GameController(ApplicationDbContext context)
+        public GameController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
-            
+            this.configuration = configuration;
+
         }
         [Route("")]
         /*Returns full list of games*/
@@ -98,7 +99,7 @@ namespace Session.Controllers
             if (user is null)
                 return StatusCode(401,new {status="Not logged in"});
             
-            bool isMod = UserLogic.isSiteModerator(_context, user.Id);
+            bool isMod = user.isSiteModerator(_context);
 
             if (!isMod)
                 return StatusCode(401, new { status = "Not a site moderator" });
@@ -106,9 +107,8 @@ namespace Session.Controllers
             /*Verification done*/
 
             /* Now add game to database.*/
-            Game g = new Game();
-            g.Title = game.Title;
-            if (!GameLogic.AddGame(_context,g,user))
+
+            if (!GameLogic.AddGame(_context,game.Title,user))
             {
                 return StatusCode(401, new { status = "That game exist in the db already" });
             }
@@ -121,11 +121,11 @@ namespace Session.Controllers
         public IActionResult AddGameImage(AddGameImageViewModel vm)
         {
             var user = UserLogic.GetUser(_context, HttpContext.Session.GetString("username"));
-            Game game = _context.Games.Where(g => g.Title == vm.GameTitle).FirstOrDefault();
+            Game game = GameLogic.GetGame(_context,vm.GameTitle);
             if (user is null)
                 return StatusCode(401, new { status = "Not logged in" });
 
-            bool isGameAdmin = UserLogic.isGameAdmin(_context,user.Id,game.Id);
+            bool isGameAdmin = user.isGameAdmin(_context,game.Id);
             if (!isGameAdmin)
                 return StatusCode(401, new { status = "Not a game admin for this game" });
 
@@ -153,8 +153,12 @@ namespace Session.Controllers
                 return BadRequest(new { msg = "Invalid data format" });
             }
 
-            
-            string filePath = $"C:\\Users\\victo\\source\\repos\\Session\\Session\\Resources\\Images\\{game.UrlTitle}.{fileType}";
+            string pathFromConfig = "";
+            if (configuration.GetValue<bool>("production"))
+                pathFromConfig = configuration.GetSection("SaveImagePath")["Production"];
+            else
+                pathFromConfig = configuration.GetSection("SaveImagePath")["Local"];
+            string filePath = $"{pathFromConfig}{game.UrlTitle}.{fileType}";
             string base64withoutHeader = vm.Img.Split(",")[1];
             System.IO.File.Delete(filePath);
             System.IO.File.WriteAllBytes(filePath, Convert.FromBase64String(base64withoutHeader));

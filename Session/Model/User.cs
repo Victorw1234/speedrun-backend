@@ -22,5 +22,20 @@ namespace Session.Model
         public IEnumerable<Time> Times { get; set; }
         public IEnumerable<GameAdmin> Admin { get; set; }
 
+        public bool isSiteModerator(ApplicationDbContext ctx)
+        {
+            var user = ctx.Users.Where(user => user.Id == Id).FirstOrDefault();
+            if (user is null)
+                return false;
+
+            return user.SiteModerator;
+        }
+
+        public bool isGameAdmin(ApplicationDbContext ctx, int gameId)
+        {
+            return (ctx.GameAdmins.Where(ga => ga.UserId == Id && ga.GameId == gameId).Count() != 0);
+        }
+
+
     }
 }

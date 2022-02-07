@@ -19,5 +19,7 @@ namespace Session.Model
         public IEnumerable<CategoryExtension> CategoryExtensions { get; set; }
         public IEnumerable<GameAdmin> Admins { get; set; }
 
+       
+
     }
 }

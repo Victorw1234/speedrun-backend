@@ -8,27 +8,29 @@ namespace Session.Logic
 {
     public static class GameLogic
     {
-        /*
-         Checks if a game already exists in the database.
-         Checking is done by title.
-         */
-        public static bool DuplicateGame(string Title,ApplicationDbContext ctx) 
+
+
+        public static Game GetGame(ApplicationDbContext ctx, string gameTitle)
+        {
+            Game game = ctx.Games.Where(g => g.Title == gameTitle).FirstOrDefault();
+            return game;
+        }
+
+        /*Checks if a game by the title exists in the database.*/
+        public static bool GameExist(string Title, ApplicationDbContext ctx)
         {
             return ctx.Games.Where(q => q.Title == Title).Count() != 0;
         }
-
-        /*Adds game to database
-          Params
-          game: game to be added. This function assumes only title is set. (Could extend it later)
+        /*Adds game with title gameTitle to database
           user: The user that added the game. This user should be set as game mod.
-          _context: database context.
          */
-        public static bool AddGame(ApplicationDbContext _context,Game game,User user)
+
+        public static bool AddGame(ApplicationDbContext _context,string gameTitle,User user)
         {
-            if (DuplicateGame(game.Title, _context))
+            if (GameExist(gameTitle,_context))
                 return false;
             Game g = new Game();
-            g.Title = game.Title;
+            g.Title = gameTitle;
             g.ImageName = "qmark.png"; //default img, questionmark
             _context.Games.Add(g);
             _context.SaveChanges();
