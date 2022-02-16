@@ -23,12 +23,14 @@ namespace Session.Logic
         }
         /*Adds game with title gameTitle to database
           user: The user that added the game. This user should be set as game mod.
+          This function does not verify that the user is a game mod.
          */
 
         public static bool AddGame(ApplicationDbContext _context,string gameTitle,User user)
         {
             if (GameExist(gameTitle,_context))
                 return false;
+
             Game g = new Game();
             g.Title = gameTitle;
             g.ImageName = "qmark.png"; //default img, questionmark
