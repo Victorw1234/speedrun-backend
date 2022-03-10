@@ -35,19 +35,26 @@ namespace Session.Controllers
                 return BadRequest(new { success = false });
             }
 
-            var listOfTimes = _context.Times.Where(q => q.User == user).Include("CategoryExtension.Game").ToList();
-            var grouped = listOfTimes.GroupBy(q => q.CategoryExtension.Game.Title).ToList();
+            var listOfTimes = _context.Times
+                .Where(q => q.User == user)
+                .Include("CategoryExtension.Game")
+                .AsEnumerable()
+                .GroupBy(q => q.CategoryExtension.Game.Title)
+                .ToList();
+            
             var returnList = new List<object>();
-            foreach(var p in grouped) // group by game
+            foreach(var p in listOfTimes) // group by game
             {
-                Debug.WriteLine(p.Key);
                 var listOfTimesForGame = new List<object>();
-                for (int i = 0; i < p.Count(); i++) // loop through all the runs for this game
+                foreach (var item in p)
                 {
-                    listOfTimesForGame.Add(new { category = p.ElementAt(i).CategoryExtension.Title,
-                                                 time = p.ElementAt(i).RunTime});
-                    
+                    listOfTimesForGame.Add(new
+                    {
+                        category = item.CategoryExtension.Title,
+                        time = item.RunTime
+                    });
                 }
+
                 var obj = new { game = p.Key, times = listOfTimesForGame };
                 returnList.Add(obj); 
             }
