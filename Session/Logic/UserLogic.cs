@@ -11,7 +11,15 @@ namespace Session.Logic
     {
         public static User GetUser(ApplicationDbContext ctx, string username)
         {
-            return ctx.Users.Where(q => q.Username == username).FirstOrDefault();
+            try
+            {
+                return ctx.Users.Where(q => q.Username == username).FirstOrDefault();
+            }
+            catch (NullReferenceException)
+            {
+                return null;
+            }
+            
         }
 
         /*public static bool isSiteModerator(ApplicationDbContext ctx,int userId)
