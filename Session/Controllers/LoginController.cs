@@ -47,8 +47,6 @@ namespace Session.Controllers
         {
             if (AuthenticateUser(user))
             {
-                HttpContext.Session.SetString("username", user.Username);
-                HttpContext.Session.SetInt32("id", user.Id); // detta är broken
                 return Ok( new { success = true,username = user.Username });
             }
             return BadRequest(new { success = false});
@@ -62,6 +60,7 @@ namespace Session.Controllers
             if (HttpContext.Session.GetString("username") != null)
             {
                 HttpContext.Session.Remove("username");
+                HttpContext.Session.Remove("id");
                 msg = "Successfully Logged Out";
                 return Ok(new { msg});
             }
@@ -78,10 +77,16 @@ namespace Session.Controllers
                 return false;
 
             var userInDB = userList.FirstOrDefault();
-
+            
             string hashed = PasswordHashing.hashPassword(user.Password,userInDB.salt);
 
-            return (hashed == userInDB.Password);
+            if (hashed == userInDB.Password)
+            {
+                HttpContext.Session.SetString("username", userInDB.Username);
+                HttpContext.Session.SetInt32("id", userInDB.Id); 
+                return true;
+            }
+            return false;
         }
     }
 }

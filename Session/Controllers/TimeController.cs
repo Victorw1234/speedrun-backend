@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Session.Attributes;
 using Session.Logic;
 using Session.Model;
 using Session.Model.ViewModels;
@@ -24,8 +25,8 @@ namespace Session.Controllers
         [Route("{urlGame}/{urlCategoryExtension}")]
         public IActionResult GameCategoryExtension(string urlGame, string urlCategoryExtension)
         {
-            Game game = GetGame(urlGame);
-            CategoryExtension categoryExtension = GetCategoryExtension(game.Id, urlCategoryExtension);
+            Game game = GameLogic.GetGameByUrl(_context,urlGame);
+            CategoryExtension categoryExtension = CategoryExtensionLogic.GetCategoryExtension(_context,game.Id, urlCategoryExtension);
 
             IEnumerable<Time> times = _context.Times.OrderBy(q => q.RunTime)
                                                     .Include("User")
@@ -35,17 +36,16 @@ namespace Session.Controllers
             return Ok(times.Select(x => new { x.Id, x.Link,x.DateSet, x.RunTime, x.User.Username }));
         }
         [HttpPost]
+        [CustomAuthorize]
         [Route("{urlGame}/{urlCategoryExtension}")]
-        public IActionResult AddTime(AddTimeViewModel time, string urlGame, string urlCategoryExtension)
+        public async Task<IActionResult> AddTimeAsync(AddTimeViewModel time, string urlGame, string urlCategoryExtension)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { timeAdded = false });
-            var username = HttpContext.Session.GetString("username");
-            if (username == null)
-                return StatusCode(401,new { timeAdded = false });
 
-            Game game = GetGame(urlGame);
-            CategoryExtension ce = GetCategoryExtension(game.Id, urlCategoryExtension);
+            Game game = GameLogic.GetGameByUrl(_context,urlGame);
+            CategoryExtension ce = CategoryExtensionLogic.GetCategoryExtension(_context,game.Id, urlCategoryExtension);
+            string username = HttpContext.Session.GetString("username");
 
             // remove their earlier time, if they had any.
             // you could change this in the future if you want
@@ -68,27 +68,16 @@ namespace Session.Controllers
             newTime.DateSet = DateTime.Now;
             newTime.UserId = UserLogic.GetUser(_context,username).Id;
 
-            _context.Times.Add(newTime);
-            _context.SaveChanges();
+            await _context.Times.AddAsync(newTime);
+            await _context.SaveChangesAsync();
 
             return Ok(new { timeAdded = true,msg = "added time successfully"});
 
         }
 
-        public Game GetGame(string urlGame)
-        {
-            return _context.Games.ToList<Game>()
-                                    .Where(q => q.UrlTitle == urlGame)
-                                    .FirstOrDefault();
-        }
+       
 
-        public CategoryExtension GetCategoryExtension(int gameId, string urlCategoryExtension)
-        {
-            return _context.CategoryExtensions.ToList<CategoryExtension>()
-                                        .Where(q => q.UrlTitle == urlCategoryExtension &&
-                                                    q.GameId == gameId)
-                                        .FirstOrDefault();
-        }
+        
 
     }
 }

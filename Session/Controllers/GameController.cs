@@ -9,6 +9,7 @@ using Session.Model;
 using Session.Model.ViewModels;
 using Session.Logic;
 using Microsoft.Extensions.Configuration;
+using Session.Attributes;
 
 namespace Session.Controllers
 {
@@ -168,8 +169,15 @@ namespace Session.Controllers
 
             return Ok(new { msg = "Successfully updated image" });
         }
+        [CustomAuthorize("SiteModerator")]
+        [Route("[action]")]
+        [HttpGet]
+        public IActionResult Testing()
+        {
 
 
+            return Ok(new { hej = "sten"});
+        }
 
     }
 }

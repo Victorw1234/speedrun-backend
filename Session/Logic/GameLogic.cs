@@ -9,7 +9,11 @@ namespace Session.Logic
     public static class GameLogic
     {
 
-
+        public static Game GetGameByUrl(ApplicationDbContext ctx, string gameUrl)
+        {
+            Game game = ctx.Games.ToList().Where(g => g.UrlTitle == gameUrl).FirstOrDefault();
+            return game;
+        }
         public static Game GetGame(ApplicationDbContext ctx, string gameTitle)
         {
             Game game = ctx.Games.Where(g => g.Title == gameTitle).FirstOrDefault();
