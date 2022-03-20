@@ -10,6 +10,7 @@ using Session.Model.ViewModels;
 using Session.Logic;
 using Microsoft.Extensions.Configuration;
 using Session.Attributes;
+using System.Diagnostics;
 
 namespace Session.Controllers
 {
@@ -36,39 +37,48 @@ namespace Session.Controllers
         [Route("{id}")]
         /*Returns 1 game by Id
          Example: localhost/api/Game/1*/
-        public IActionResult GameById(int id)
+        public async Task<IActionResult> GameById(int id)
         {
-            List<GameAdmin> u = _context.Games.Include("Admins").Include("Admins.User").Where(q => q.Id == id).FirstOrDefault().Admins.ToList<GameAdmin>();
-            List<string> gameAdminUsernames = new List<string>();
-            for (int i  = 0; i < u.Count(); i++)
+
+            var gameAdminUsernames = _context.GameAdmins
+                                     .Where(item => item.GameId == id)
+                                     .Include("User")
+                                     .Select(item => item.User.Username);
+
+            Game game = await _context.Games
+                                 .Include("CategoryExtensions")
+                                 .FirstOrDefaultAsync(item => item.Id == id);
+             if (game == null)
+             {
+                 return BadRequest(new {Error = "No game with that Id exist" });
+             }
+
+
+            var returnObject = new
             {
-                gameAdminUsernames.Add(u.ElementAt(i).User.Username);
-            }
-            Game game = _context.Games
-                                .Include("CategoryExtensions")
-                                .Include("Admins").Include("Admins.User")
-                                .Where(q => q.Id == id)
-                                .FirstOrDefault();
-            if (game == null)
-            {
-                return BadRequest(new {Error = "No game with that Id exist" });
-            }
-            return Ok(
-                new
-                {
-                    success = true,
-                    categoryExtensions = game.CategoryExtensions,
-                    imageName = game.ImageName,
-                    title = game.Title,
-                    urlTitle = game.UrlTitle,
-                    admins = gameAdminUsernames
-                }
-                );
+                success = true,
+                categoryExtensions = game.CategoryExtensions.Select(item => new {
+                    id = item.Id,
+                    title = item.Title,
+                    urlTitle = item.UrlTitle,
+                    gameId = item.UrlTitle
+                }),
+                 imageName = game.ImageName,
+                 title = game.Title,
+                 urlTitle = game.UrlTitle,
+                 admins = gameAdminUsernames
+             };
+
+             return Ok(
+                returnObject
+                 );
         }
         [Route("[action]/{urlTitle}")]
         /*Returns one game by url-string
           Example: localhost/api/Game/ByString/halo_3 (this is pretty ugly)
           returns halo 3*/
+
+        /*Should rewrite this in the future, as this needs two db checks as of now.*/
         public IActionResult ByString(string urlTitle)
         {
             int gameId;
@@ -82,6 +92,7 @@ namespace Session.Controllers
             }
             catch (NullReferenceException e)
             {
+                Debug.WriteLine(e);
                 return BadRequest(new { success = false });
             }
             return RedirectToAction("GameById", new { id = gameId });
@@ -91,23 +102,14 @@ namespace Session.Controllers
          can add a game.
          */
         [Route("AddGame")]
+        [CustomAuthorize("SiteModerator")]
         [HttpPost]
-        public IActionResult AddGame(AddGameViewModel game)
+        public async Task<IActionResult> AddGame(AddGameViewModel game)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            var user = UserLogic.GetUser(_context, HttpContext.Session.GetString("username"));
-            if (user is null)
-                return StatusCode(401,new {status="Not logged in"});
-            
-            bool isMod = user.isSiteModerator(_context);
 
-            if (!isMod)
-                return StatusCode(401, new { status = "Not a site moderator" });
-
-            /*Verification done*/
-
-            /* Now add game to database.*/
+            var user = await Session.Model.User.GetUser(_context, HttpContext.Session.GetInt32("id"));
 
             if (!GameLogic.AddGame(_context,game.Title,user))
             {
@@ -117,15 +119,17 @@ namespace Session.Controllers
             return Ok(new { status="Successfully added game to database"});
         }
 
+        /*
+         Game mod can upload an image for the game
+        */
         [Route("[action]")]
+        [CustomAuthorize]
         [HttpPost]
         public IActionResult AddGameImage(AddGameImageViewModel vm)
         {
-            var user = UserLogic.GetUser(_context, HttpContext.Session.GetString("username"));
             Game game = GameLogic.GetGame(_context,vm.GameTitle);
-            if (user is null)
-                return StatusCode(401, new { status = "Not logged in" });
 
+            var user = Session.Model.User.GetUser(_context, HttpContext.Session.GetString("username"));
             bool isGameAdmin = user.isGameAdmin(_context,game.Id);
             if (!isGameAdmin)
                 return StatusCode(401, new { status = "Not a game admin for this game" });
@@ -154,13 +158,15 @@ namespace Session.Controllers
                 return BadRequest(new { msg = "Invalid data format" });
             }
 
+            
             string pathFromConfig = "";
-            if (configuration.GetValue<bool>("production"))
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
                 pathFromConfig = configuration.GetSection("SaveImagePath")["Production"];
             else
                 pathFromConfig = configuration.GetSection("SaveImagePath")["Local"];
             string filePath = $"{pathFromConfig}{game.UrlTitle}.{fileType}";
             string base64withoutHeader = vm.Img.Split(",")[1];
+            //async?
             System.IO.File.Delete(filePath);
             System.IO.File.WriteAllBytes(filePath, Convert.FromBase64String(base64withoutHeader));
             game.ImageName = game.UrlTitle + "." + fileType;
@@ -169,15 +175,5 @@ namespace Session.Controllers
 
             return Ok(new { msg = "Successfully updated image" });
         }
-        [CustomAuthorize("SiteModerator")]
-        [Route("[action]")]
-        [HttpGet]
-        public IActionResult Testing()
-        {
-
-
-            return Ok(new { hej = "sten"});
-        }
-
     }
 }

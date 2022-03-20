@@ -9,7 +9,7 @@ namespace Session.Logic
 {
     public static class UserLogic
     {
-        public static User GetUser(ApplicationDbContext ctx, string username)
+        /*public static User GetUser(ApplicationDbContext ctx, string username)
         {
             try
             {
@@ -22,19 +22,17 @@ namespace Session.Logic
             
         }
 
-        /*public static bool isSiteModerator(ApplicationDbContext ctx,int userId)
+        public async static Task<User> GetUser(ApplicationDbContext ctx, int? id)
         {
-            var user = ctx.Users.Where(user => user.Id == userId).FirstOrDefault();
-            if (user is null)
-                return false;
-
-            return user.SiteModerator;
-
-        }
-
-        public static bool isGameAdmin(ApplicationDbContext ctx, int userId,int gameId)
-        {
-            return (ctx.GameAdmins.Where(ga => ga.UserId == userId && ga.GameId == gameId).Count() != 0);
+            try
+            {
+                return await ctx.Users.FindAsync(id);
+            }
+            catch (NullReferenceException)
+            {
+                return null;
+            }
         }*/
+
     }
 }

@@ -29,7 +29,7 @@ namespace Session.Controllers
         //Returns all the data used in the userpages
         public IActionResult UserData(string username)
         {
-            var user = UserLogic.GetUser(_context,username);
+            var user = Session.Model.User.GetUser(_context,username);
             if (user == null)
             {
                 return BadRequest(new { success = false });

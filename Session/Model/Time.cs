@@ -16,5 +16,7 @@ namespace Session.Model
         public int CategoryExtensionId { get; set; }
         public CategoryExtension CategoryExtension { get; set; }
 
+
+        
     }
 }

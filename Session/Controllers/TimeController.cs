@@ -51,6 +51,8 @@ namespace Session.Controllers
             // you could change this in the future if you want
             // to maintain a history of their PBs
 
+            
+
             Time t = _context.Times.Where(q => q.CategoryExtensionId == ce.Id && // their old time
                                  q.User.Username == username)
                                     .FirstOrDefault();
@@ -66,7 +68,7 @@ namespace Session.Controllers
             newTime.Link = time.Link;
             newTime.RunTime = new DateTime(1,1,1,time.RunTime.Hour, time.RunTime.Minute, time.RunTime.Second, time.RunTime.Millisecond);
             newTime.DateSet = DateTime.Now;
-            newTime.UserId = UserLogic.GetUser(_context,username).Id;
+            newTime.UserId = Session.Model.User.GetUser(_context,username).Id;
 
             await _context.Times.AddAsync(newTime);
             await _context.SaveChangesAsync();

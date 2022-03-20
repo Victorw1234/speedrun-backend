@@ -23,7 +23,7 @@ namespace Session.Controllers
         [HttpPost]
         public IActionResult AddCategoryExtension(AddCategoryExtensionViewModel vm)
         {
-            User user = UserLogic.GetUser(_context,HttpContext.Session.GetString("username"));
+            User user = Session.Model.User.GetUser(_context,HttpContext.Session.GetString("username"));
             if (user is null)
             {
                 return StatusCode(401, new { message = "Unauthorized, not logged in" });

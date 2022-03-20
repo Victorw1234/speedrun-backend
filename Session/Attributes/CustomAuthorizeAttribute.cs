@@ -10,6 +10,10 @@ using System.Threading.Tasks;
 
 namespace Session.Attributes
 {
+    //
+    // Summary:
+    //     Requires the user to be logged in to access the endpoint.
+    //     Add parameter "SiteModerator" to enforce the user to be sitemoderator
     public class CustomAuthorizeAttribute : Attribute, IAuthorizationFilter
     {
         private  ApplicationDbContext _ctx;
@@ -33,6 +37,7 @@ namespace Session.Attributes
             if (id is null) // nott logged in!
             {
                 context.Result = new UnauthorizedResult();
+                return;
             }
 
             if (_accessLevel != null)
@@ -42,6 +47,7 @@ namespace Session.Attributes
                     .RequestServices
                     .GetService(typeof(ApplicationDbContext)) as ApplicationDbContext; // gets dbcontext
                 User user = _ctx.Users.Find(context.HttpContext.Session.GetInt32("id"));
+
                 if (_accessLevel == "SiteModerator" && !user.SiteModerator) // user is not site moderator, but they need to be to access
                 {
                     context.Result = new UnauthorizedResult();
