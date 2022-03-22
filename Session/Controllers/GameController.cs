@@ -109,7 +109,7 @@ namespace Session.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var user = await Session.Model.User.GetUser(_context, HttpContext.Session.GetInt32("id"));
+            var user = await _context.GetUser(HttpContext.Session.GetInt32("id"));
 
             if (!GameLogic.AddGame(_context,game.Title,user))
             {
@@ -129,7 +129,7 @@ namespace Session.Controllers
         {
             Game game = GameLogic.GetGame(_context,vm.GameTitle);
 
-            var user = Session.Model.User.GetUser(_context, HttpContext.Session.GetString("username"));
+            var user = _context.GetUser(HttpContext.Session.GetString("username"));
             bool isGameAdmin = user.isGameAdmin(_context,game.Id);
             if (!isGameAdmin)
                 return StatusCode(401, new { status = "Not a game admin for this game" });

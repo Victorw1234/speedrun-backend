@@ -26,7 +26,7 @@ namespace Session.Controllers
         [HttpPost]
         public IActionResult AddCategoryExtension(AddCategoryExtensionViewModel vm)
         {
-            User user = Session.Model.User.GetUser(_context,HttpContext.Session.GetString("username"));
+            User user = _context.GetUser(HttpContext.Session.GetString("username"));
             Game game = _context.Games.Where(g => g.Title == vm.gameTitle).FirstOrDefault();
 
             bool isGameMod = user.isGameAdmin(_context,game.Id);

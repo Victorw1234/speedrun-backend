@@ -36,36 +36,5 @@ namespace Session.Model
             return (ctx.GameAdmins.Where(ga => ga.UserId == Id && ga.GameId == gameId).Count() != 0);
         }
 
-
-        /*
-         These static functions are mainly used for when u dont have
-        the user object, and want to get it.
-         */
-        public static User GetUser(ApplicationDbContext ctx, string username)
-        {
-            try
-            {
-                return ctx.Users.Where(q => q.Username == username).FirstOrDefault();
-            }
-            catch (NullReferenceException)
-            {
-                return null;
-            }
-
-        }
-
-        public async static Task<User> GetUser(ApplicationDbContext ctx, int? id)
-        {
-            try
-            {
-                return await ctx.Users.FindAsync(id);
-            }
-            catch (NullReferenceException)
-            {
-                return null;
-            }
-        }
-
-
     }
 }

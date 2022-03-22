@@ -68,7 +68,7 @@ namespace Session.Controllers
             newTime.Link = time.Link;
             newTime.RunTime = new DateTime(1,1,1,time.RunTime.Hour, time.RunTime.Minute, time.RunTime.Second, time.RunTime.Millisecond);
             newTime.DateSet = DateTime.Now;
-            newTime.UserId = Session.Model.User.GetUser(_context,username).Id;
+            newTime.UserId = _context.GetUser(username).Id;
 
             await _context.Times.AddAsync(newTime);
             await _context.SaveChangesAsync();

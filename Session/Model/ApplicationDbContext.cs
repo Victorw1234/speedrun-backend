@@ -18,6 +18,22 @@ namespace Session.Model
         public DbSet<Time> Times { get; set; }
         public DbSet<CategoryExtension> CategoryExtensions { get; set; }
         public DbSet<GameAdmin> GameAdmins { get; set; }
+
+        public async Task<User> GetUser(int? id)
+        {
+            var user = await Users.FindAsync(id);
+            return user is null ?  user :  null;
+        }
+
+        public User GetUser(string username)
+        {
+            var user = Users.Where(user => user.Username == username);
+            if (user.Count() == 1)
+                return user.ElementAt(0);
+
+            return null;
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasData(
